@@ -5,6 +5,8 @@ import * as ibe from "../crypto/ibe"
 import {Ciphertext} from "../crypto/ibe"
 import {Point} from "./index"
 import {bls12_381} from "@noble/curves/bls12-381"
+import {sha256} from "@noble/hashes/sha256"
+import {bytesToHex} from "../crypto/utils"
 
 export function createTimelockDecrypter(network: ChainClient) {
     return async (recipients: Array<Stanza>): Promise<Uint8Array> => {
@@ -19,8 +21,8 @@ export function createTimelockDecrypter(network: ChainClient) {
             throw Error(`Timelock expects the type of the stanza to be "tlock`)
         }
 
-        if (args.length !== 2) {
-            throw Error(`Timelock stanza expected 2 args: roundNumber and chainHash. Only received ${args.length}`)
+        if (args.length < 2 || args.length > 3) {
+            throw Error(`Timelock stanza expected 2 or 3 args: roundNumber, chainHash, and optionally fileKeyHash. Received ${args.length}`)
         }
 
         const chainInfo = await network.chain().info()
@@ -33,22 +35,37 @@ export function createTimelockDecrypter(network: ChainClient) {
         const beacon = await fetchBeacon(network, roundNumber)
         console.log(`beacon received: ${JSON.stringify(beacon)}`)
 
+        let fileKey: Uint8Array
         switch (chainInfo.schemeID) {
             case "pedersen-bls-unchained": {
                 const ciphertext = parseCiphertext(body, bls12_381.G1.ProjectivePoint.BASE)
-                return await ibe.decryptOnG1(Buffer.from(beacon.signature, "hex"), ciphertext)
+                fileKey = await ibe.decryptOnG1(Uint8Array.from(Buffer.from(beacon.signature, "hex")), ciphertext)
             }
+                break;
             case "bls-unchained-on-g1": {
                 const ciphertext = parseCiphertext(body, bls12_381.G2.ProjectivePoint.BASE)
-                return await ibe.decryptOnG2(Buffer.from(beacon.signature, "hex"), ciphertext)
+                fileKey = await ibe.decryptOnG2(Uint8Array.from(Buffer.from(beacon.signature, "hex")), ciphertext)
             }
+                break;
             case "bls-unchained-g1-rfc9380": {
                 const ciphertext = parseCiphertext(body, bls12_381.G2.ProjectivePoint.BASE)
-                return await ibe.decryptOnG2(Buffer.from(beacon.signature, "hex"), ciphertext)
+                fileKey = await ibe.decryptOnG2(Uint8Array.from(Buffer.from(beacon.signature, "hex")), ciphertext)
             }
+                break;
             default:
                 throw Error(`Unsupported scheme: ${chainInfo.schemeID} - you must use a drand network with an unchained scheme for timelock decryption!`)
         }
+
+        // Validate filekey hash if provided (for new format with 3 args)
+        if (args.length === 3) {
+            const expectedFileKeyHash = args[2]
+            const actualFileKeyHash = bytesToHex(sha256(fileKey))
+            if (actualFileKeyHash !== expectedFileKeyHash) {
+                throw Error(`Filekey hash verification failed: expected=${expectedFileKeyHash}, actual=${actualFileKeyHash}`)
+            }
+        }
+
+        return fileKey
     }
 
     function parseRoundNumber(args: Array<string>): number {

@@ -4,6 +4,7 @@ import * as ibe from "../crypto/ibe"
 import {ChainClient} from "drand-client"
 import {Stanza} from "../age/age-encrypt-decrypt"
 import {Ciphertext} from "../crypto/ibe"
+import {bytesToHex} from "../crypto/utils"
 
 export function createTimelockEncrypter(client: ChainClient, roundNumber: number) {
     if (roundNumber < 1) {
@@ -31,9 +32,14 @@ export function createTimelockEncrypter(client: ChainClient, roundNumber: number
             default:
                 throw Error(`Unsupported scheme: ${chainInfo.schemeID} - you must use a drand network with an unchained scheme for timelock encryption!`)
         }
+
+        // Calculate hash of filekey
+        const fileKeyHash = sha256(fileKey)
+        const fileKeyHashHex = bytesToHex(fileKeyHash)
+
         return [{
             type: "tlock",
-            args: [`${roundNumber}`, chainInfo.hash],
+            args: [`${roundNumber}`, chainInfo.hash, fileKeyHashHex],
             body: serialisedCiphertext(ciphertext)
         }]
     }
