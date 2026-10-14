@@ -1,10 +1,10 @@
 import {
-    ChainClient,
+    type ChainClient,
     HttpChainClient,
     HttpCachingChain,
     roundTime,
     roundAt,
-    ChainInfo,
+    type ChainInfo,
     defaultChainOptions
 } from "drand-client"
 import {Buffer} from "buffer"
@@ -87,10 +87,10 @@ export function nonRFCMainnetClient(): HttpChainClient {
 }
 
 export {
-    ChainClient,
+    type ChainClient,
     HttpChainClient,
     HttpCachingChain,
-    ChainInfo,
+    type ChainInfo,
     defaultChainInfo,
     defaultChainUrl,
     roundTime,

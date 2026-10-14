@@ -3,7 +3,7 @@ import {randomBytes} from "@noble/hashes/utils"
 import {bls12_381} from "@noble/curves/bls12-381"
 import {Buffer} from "buffer"
 import {bytesToNumberBE, fp12ToBytes, xor} from "./utils"
-import {Fp12} from "./fp"
+import {type Fp12} from "./fp"
 
 export interface Ciphertext {
     U: Uint8Array
