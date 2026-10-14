@@ -1,9 +1,9 @@
 import {sha256} from "@noble/hashes/sha256"
 import {Buffer} from "buffer"
 import * as ibe from "../crypto/ibe"
-import {ChainClient} from "drand-client"
-import {Stanza} from "../age/age-encrypt-decrypt"
-import {Ciphertext} from "../crypto/ibe"
+import {type ChainClient} from "drand-client"
+import {type Stanza} from "../age/age-encrypt-decrypt"
+import {type Ciphertext} from "../crypto/ibe"
 import {bytesToHex} from "../crypto/utils"
 
 export function createTimelockEncrypter(client: ChainClient, roundNumber: number) {

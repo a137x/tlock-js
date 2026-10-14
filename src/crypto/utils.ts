@@ -1,5 +1,5 @@
 import {Buffer} from "buffer"
-import {Fp, Fp12, Fp2, Fp6} from "./fp"
+import {Fp, type Fp12, Fp2, Fp6} from "./fp"
 
 // returns a new array with the xor of a ^ b
 export function xor(a: Uint8Array, b: Uint8Array): Uint8Array {

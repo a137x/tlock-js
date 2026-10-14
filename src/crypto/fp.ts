@@ -96,4 +96,4 @@ function fp12FromBigTwelve(b: BigintTwelve): Fp12 {
     }
 }
 
-export {Fp, Fp2, Fp6, Fp12, fp2FromBigTuple, fp6FromBigSix, fp12FromBigTwelve, BigintTwelve}
+export {Fp, Fp2, Fp6, type Fp12, fp2FromBigTuple, fp6FromBigSix, fp12FromBigTwelve, type BigintTwelve}
